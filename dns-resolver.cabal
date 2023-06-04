@@ -1,0 +1,76 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           dns-resolver
+version:        0.1.0.0
+category:       Web
+homepage:       https://github.com/githubuser/dns-resolver#readme
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2023 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+library
+  exposed-modules:
+      Data.Bits.Helper
+      Dns
+      Dns.Model
+      Dns.Parser
+      Dns.Query
+  other-modules:
+      Paths_dns_resolver
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Werror -Wunused-packages -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-unticked-promoted-constructors
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , network
+    , network-run
+    , random
+  default-language: Haskell2010
+
+executable dns-resolver
+  main-is: Main.hs
+  other-modules:
+      Paths_dns_resolver
+  hs-source-dirs:
+      app
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Werror -Wunused-packages -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-unticked-promoted-constructors
+  build-depends:
+      base
+    , dns-resolver
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Driver.hs
+  other-modules:
+      Test.Dns.Parser
+      Paths_dns_resolver
+  hs-source-dirs:
+      test
+  default-extensions:
+      OverloadedStrings
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Werror -Wunused-packages -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-unticked-promoted-constructors -fno-warn-type-defaults -fno-warn-missing-home-modules -Wno-missing-export-lists -Wno-unused-packages
+  build-depends:
+      base
+    , bytestring
+    , dns-resolver
+    , hedgehog
+    , tasty
+    , tasty-discover
+    , tasty-hedgehog
+  default-language: Haskell2010

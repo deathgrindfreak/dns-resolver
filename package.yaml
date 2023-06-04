@@ -1,0 +1,68 @@
+name:                dns-resolver
+version:             0.1.0.0
+#synopsis:
+#description:
+homepage:            https://github.com/githubuser/dns-resolver#readme
+license:             BSD3
+author:              Author name here
+maintainer:          example@example.com
+copyright:           2023 Author name here
+category:            Web
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+  - -Werror
+  - -Wunused-packages
+  - -Wno-implicit-prelude
+  - -Wno-safe
+  - -Wno-unsafe
+  - -Wno-unticked-promoted-constructors
+
+default-extensions:
+  - OverloadedStrings
+
+library:
+  source-dirs: src
+  dependencies:
+    - base >= 4.7 && < 5
+    - network
+    - network-run
+    - bytestring
+    - random
+
+executables:
+  dns-resolver:
+    main:             Main.hs
+    source-dirs:      app
+    dependencies:
+      - dns-resolver
+      - base
+
+tests:
+  spec:
+    main: Driver.hs
+    source-dirs: test
+    ghc-options:
+      - -fno-warn-type-defaults
+      - -fno-warn-missing-home-modules
+      - -Wno-missing-export-lists
+      - -Wno-unused-packages
+    dependencies:
+      - dns-resolver
+      - base
+      - bytestring
+      - hedgehog
+      - tasty
+      - tasty-discover
+      - tasty-hedgehog
