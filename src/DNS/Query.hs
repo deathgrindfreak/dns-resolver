@@ -1,4 +1,4 @@
-module Dns.Query (runQuery)
+module DNS.Query (runQuery)
 where
 
 import qualified Data.ByteString.Char8 as C
@@ -8,8 +8,8 @@ import Network.Run.UDP (runUDPClient)
 import Network.Socket.ByteString (recv, sendAllTo)
 import System.Random
 
-import Dns.Model
-import Dns.Parser
+import DNS.Model
+import DNS.Encode
 
 runQuery :: BS.ByteString -> IO ()
 runQuery domainName = do

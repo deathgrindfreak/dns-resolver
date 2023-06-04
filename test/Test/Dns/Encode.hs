@@ -1,4 +1,4 @@
-module Test.Dns.Parser (test_DnsParser) where
+module Test.Dns.Encode (test_DnsEncode) where
 
 import Hedgehog ((===))
 import qualified Hedgehog as HH
@@ -7,12 +7,12 @@ import qualified Test.Tasty.Hedgehog as THH
 
 import qualified Data.ByteString.Builder as BSB
 
-import Dns
+import DNS
 
-test_DnsParser :: Tasty.TestTree
-test_DnsParser =
+test_DnsEncode :: Tasty.TestTree
+test_DnsEncode =
   Tasty.testGroup
-    "DNS Parsing"
+    "DNS Encode"
     [ THH.testProperty "Should encode example.com" $
         HH.property $ do
           let result =

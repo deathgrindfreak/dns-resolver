@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Dns
+import DNS
 
 main :: IO ()
 main = runQuery "example.com"

@@ -1,4 +1,4 @@
-module Dns.Model
+module DNS.Model
   ( DNSHeader (..)
   , DNSHeaderFlags (..)
   , QR (..)

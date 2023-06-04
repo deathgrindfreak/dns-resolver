@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 
-module Dns.Parser
+module DNS.Encode
   ( serializeQuery
   , serializeHeader
   , serializeFlags
@@ -13,7 +13,7 @@ where
 import Data.Bits (shiftL, (.|.))
 import Data.Bits.Helper
 import Data.Word (Word16, Word8)
-import Dns.Model
+import DNS.Model
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Builder as BSB
@@ -47,16 +47,15 @@ serializeHeader header =
 
 serializeFlags :: DNSHeaderFlags -> Word16
 serializeFlags fs =
-  foldr
+  foldr1
     (.|.)
-    0
     [ serializeRCode fs.rCode
-    , set fs.recursionAvailable `shiftL` 7
-    , set fs.recursive `shiftL` 8
-    , set fs.tc `shiftL` 9
-    , set fs.authoritativeAnswers `shiftL` 10
+    , flag fs.recursionAvailable 7
+    , flag fs.recursive 8
+    , flag fs.tc 9
+    , flag fs.authoritativeAnswers 10
     , mask 4 (fromIntegral fs.opCode) `shiftL` 11
-    , set (fs.qr == Response) `shiftL` 15
+    , flag (fs.qr == Response) 15
     ]
   where
     serializeRCode r =
@@ -64,8 +63,6 @@ serializeFlags fs =
         Success -> 0
         ServFail -> 2
         NXDomain -> 3
-
-    set b = if b then 1 else 0
 
 serializeQuestion :: DNSQuestion -> BSB.Builder
 serializeQuestion qstn =

@@ -21,10 +21,10 @@ extra-source-files:
 library
   exposed-modules:
       Data.Bits.Helper
-      Dns
-      Dns.Model
-      Dns.Parser
-      Dns.Query
+      DNS
+      DNS.Encode
+      DNS.Model
+      DNS.Query
   other-modules:
       Paths_dns_resolver
   hs-source-dirs:
@@ -58,7 +58,7 @@ test-suite spec
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   other-modules:
-      Test.Dns.Parser
+      Test.Dns.Encode
       Paths_dns_resolver
   hs-source-dirs:
       test
