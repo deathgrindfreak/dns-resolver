@@ -5,9 +5,11 @@ module DNS.Model
   , RCode (..)
   , DNSQuestion (..)
   , DNSRequestType (..)
+  , DNSRecord (..)
   , defaultFlags
   , defaultHeader
   , dnsRequestTypeId
+  , idToDNSRequestType
   )
 where
 
@@ -51,6 +53,14 @@ data DNSQuestion = DNSQuestion
   }
   deriving (Show)
 
+data DNSRecord = DNSRecord
+  { recordName :: BS.ByteString
+  , recordType :: DNSRequestType
+  , recordClass :: Int
+  , recordTTL :: Int
+  , recordData :: BS.ByteString
+  }
+
 data DNSRequestType
   = A
   | AAAA
@@ -71,3 +81,15 @@ dnsRequestTypeId tp =
     NS -> 2
     MX -> 15
     SOA -> 6
+
+idToDNSRequestType :: Int -> Either String DNSRequestType
+idToDNSRequestType tp =
+  case tp of
+    1 -> Right A
+    28 -> Right AAAA
+    16 -> Right TXT
+    5 -> Right CNAME
+    2 -> Right NS
+    15 -> Right MX
+    6 -> Right SOA
+    r -> Left $ "Unknown request type " <> show r

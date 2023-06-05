@@ -1,15 +1,15 @@
 module DNS.Query (runQuery)
 where
 
-import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as LBS
 import Network.Run.UDP (runUDPClient)
 import Network.Socket.ByteString (recv, sendAllTo)
 import System.Random
 
-import DNS.Model
 import DNS.Encode
+import DNS.Model
 
 runQuery :: BS.ByteString -> IO ()
 runQuery domainName = do

@@ -10,10 +10,10 @@ module DNS.Encode
   )
 where
 
+import DNS.Model
 import Data.Bits (shiftL, (.|.))
 import Data.Bits.Helper
 import Data.Word (Word16, Word8)
-import DNS.Model
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Builder as BSB
