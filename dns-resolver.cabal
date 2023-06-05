@@ -41,7 +41,6 @@ library
     , network
     , network-run
     , random
-    , transformers
   default-language: Haskell2010
 
 executable dns-resolver

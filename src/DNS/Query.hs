@@ -2,12 +2,12 @@ module DNS.Query (runQuery)
 where
 
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as LBS
 import Network.Run.UDP (runUDPClient)
 import Network.Socket.ByteString (recv, sendAllTo)
 import System.Random
 
+import DNS.Decode
 import DNS.Encode
 import DNS.Model
 
@@ -19,5 +19,4 @@ runQuery domainName = do
   runUDPClient "8.8.8.8" "53" $ \s sAddr -> do
     sendAllTo s query sAddr
     msg <- recv s 1024
-    putStr "Received: "
-    C.putStrLn msg
+    either error print $ parseResponse msg

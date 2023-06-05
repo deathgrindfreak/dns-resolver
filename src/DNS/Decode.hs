@@ -1,20 +1,40 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 module DNS.Decode
-  ( parseHeader
+  ( parseResponse
+  , parseHeader
+  , parseQuestion
   , parseFlags
   , isZSet
   )
 where
 
-import Control.Monad (when)
+import Control.Monad (mzero, when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.Helper
 import Data.Bits (shiftR, testBit)
 import Data.Bits.Helper
+import qualified Data.ByteString as BS
 import Data.Word (Word16)
+import Prelude hiding (take)
 
 import DNS.Model
+
+parseResponse ::
+  BS.ByteString ->
+  Either String (DNSHeader Int, DNSQuestion)
+parseResponse = parseOnly $ (,) <$> parseHeader <*> parseQuestion
+
+parseQuestion :: Parser DNSQuestion
+parseQuestion = do
+  DNSQuestion
+    <$> (BS.intercalate "." <$> many1' parsePart <* anyWord8)
+    <*> (either fail pure . idToDNSRequestType =<< anyWord16BE)
+    <*> (fromIntegral <$> anyWord16BE)
+  where
+    parsePart = do
+      l <- fromIntegral <$> anyWord8
+      if l == 0 then mzero else take l
 
 parseHeader :: Parser (DNSHeader Int)
 parseHeader =
@@ -32,7 +52,7 @@ parseFlags = do
       3 -> pure NXDomain
       r -> fail $ "Unknown RCODE " <> show r
 
-  when (isZSet flagNum) $ do
+  when (isZSet flagNum) $
     fail "Z bits cannot be set"
 
   pure $

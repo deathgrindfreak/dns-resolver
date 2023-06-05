@@ -67,7 +67,7 @@ serializeFlags fs =
 serializeQuestion :: DNSQuestion -> BSB.Builder
 serializeQuestion qstn =
   encodeDnsName qstn.name
-    <> (BSB.word16BE . fromIntegral . dnsRequestTypeId) qstn.type_
+    <> (BSB.word16BE . dnsRequestTypeId) qstn.type_
     <> (BSB.word16BE . fromIntegral) qstn.class_
 
 encodeDnsName :: BS.ByteString -> BSB.Builder

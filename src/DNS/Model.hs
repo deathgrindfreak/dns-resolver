@@ -1,3 +1,5 @@
+{-# LANGUAGE StrictData #-}
+
 module DNS.Model
   ( DNSHeader (..)
   , DNSHeaderFlags (..)
@@ -14,6 +16,7 @@ module DNS.Model
 where
 
 import qualified Data.ByteString as BS
+import Data.Word (Word16)
 
 defaultFlags :: DNSHeaderFlags
 defaultFlags =
@@ -71,7 +74,7 @@ data DNSRequestType
   | SOA
   deriving (Show, Eq, Enum)
 
-dnsRequestTypeId :: DNSRequestType -> Int
+dnsRequestTypeId :: DNSRequestType -> Word16
 dnsRequestTypeId tp =
   case tp of
     A -> 1
@@ -82,7 +85,7 @@ dnsRequestTypeId tp =
     MX -> 15
     SOA -> 6
 
-idToDNSRequestType :: Int -> Either String DNSRequestType
+idToDNSRequestType :: Word16 -> Either String DNSRequestType
 idToDNSRequestType tp =
   case tp of
     1 -> Right A

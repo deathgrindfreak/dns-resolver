@@ -36,7 +36,6 @@ library:
   source-dirs: src
   dependencies:
     - base >= 4.7 && < 5
-    - transformers
     - network
     - network-run
     - bytestring
