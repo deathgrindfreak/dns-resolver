@@ -7,7 +7,7 @@ import Options.Applicative
 
 import DNS (runQuery)
 
-data Args = Args
+newtype Args = Args
   { domain :: String
   }
 

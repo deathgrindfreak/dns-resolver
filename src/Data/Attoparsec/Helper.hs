@@ -8,7 +8,7 @@ where
 
 import Data.Attoparsec.ByteString
 import qualified Data.ByteString as BS
-import Data.Word (Word32, Word16, Word8)
+import Data.Word (Word16, Word32, Word8)
 
 byteWidth :: Int
 byteWidth = 16 ^ (2 :: Int)

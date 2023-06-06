@@ -1,6 +1,6 @@
+{-# LANGUAGE BinaryLiterals #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE BinaryLiterals #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 
@@ -14,13 +14,13 @@ module DNS.Decode
   )
 where
 
+import Control.Applicative ((<|>))
 import Control.Monad (mzero, when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.Helper
 import Data.Bits (shiftR, testBit, (.&.))
 import Data.Bits.Helper
 import qualified Data.ByteString as BS
-import Data.Either (partitionEithers)
 import Data.Word (Word16)
 import Prelude hiding (take)
 
@@ -34,10 +34,10 @@ parsePacket = do
     Just packet -> do
       h <- parseHeader
       DNSPacket h
-        <$> (count h.numQuestions parseQuestion)
-        <*> (count h.numAnswers (parseRecord packet))
-        <*> (count h.numAuthorities (parseRecord packet))
-        <*> (count h.numAdditionals (parseRecord packet))
+        <$> count h.numQuestions parseQuestion
+        <*> count h.numAnswers (parseRecord packet)
+        <*> count h.numAuthorities (parseRecord packet)
+        <*> count h.numAdditionals (parseRecord packet)
 
 parseQuestion :: Parser DNSQuestion
 parseQuestion = do
@@ -57,22 +57,20 @@ parseRecord packet =
 
 parseName :: BS.ByteString -> Parser BS.ByteString
 parseName packet = do
-  parts <- partitionEithers <$> many1' parsePart
-  parts' <- case parts of
-              ([], rs) -> anyWord8 *> pure rs
-              (ls, []) -> pure ls
-              _ -> fail "Mixed compressed and uncompressed parts"
-  pure $ BS.intercalate "." parts'
+  parseCompressed <|> (BS.intercalate "." <$> many1' parsePart <* anyWord8)
   where
     parsePart =
       anyWord8 >>= \case
         0 -> mzero
-        l | l .&. 0b1100_0000 /= 0 -> Left <$> parseCompressed l
-        l -> Right <$> take (fromIntegral l)
+        l -> take (fromIntegral l)
 
-    parseCompressed l = do
-      l' <- fromIntegral . ((l .&. 0b0011_1111) +) <$> anyWord8
-      subParser (parseName packet) (BS.drop l' packet)
+    parseCompressed = do
+      l <- anyWord8
+      if l .&. 0b1100_0000 == 0
+        then mzero
+        else do
+          l' <- fromIntegral . (l .&. 0b0011_1111 +) <$> anyWord8
+          subParser (parseName packet) (BS.drop l' packet)
 
 parseHeader :: Parser (DNSHeader Int)
 parseHeader =
