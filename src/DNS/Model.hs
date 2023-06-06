@@ -1,7 +1,8 @@
 {-# LANGUAGE StrictData #-}
 
 module DNS.Model
-  ( DNSHeader (..)
+  ( DNSPacket (..)
+  , DNSHeader (..)
   , DNSHeaderFlags (..)
   , QR (..)
   , RCode (..)
@@ -24,6 +25,15 @@ defaultFlags =
 
 defaultHeader :: DNSHeader ()
 defaultHeader = DNSHeader () defaultFlags 0 0 0 0
+
+data DNSPacket = DNSPacket
+  { header :: DNSHeader Int
+  , questions :: [DNSQuestion]
+  , answers :: [DNSRecord]
+  , authorities :: [DNSRecord]
+  , additionals :: [DNSRecord]
+  }
+  deriving (Show)
 
 data QR = Query | Response deriving (Eq, Enum, Show)
 data RCode = Success | ServFail | NXDomain deriving (Eq, Enum, Show)
@@ -63,6 +73,7 @@ data DNSRecord = DNSRecord
   , recordTTL :: Int
   , recordData :: BS.ByteString
   }
+  deriving (Show)
 
 data DNSRequestType
   = A

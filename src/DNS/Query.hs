@@ -1,6 +1,7 @@
 module DNS.Query (runQuery)
 where
 
+import Data.Attoparsec.ByteString
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
 import Network.Run.UDP (runUDPClient)
@@ -19,4 +20,4 @@ runQuery domainName = do
   runUDPClient "8.8.8.8" "53" $ \s sAddr -> do
     sendAllTo s query sAddr
     msg <- recv s 1024
-    either error print $ parseResponse msg
+    either error print $ parseOnly parsePacket msg
