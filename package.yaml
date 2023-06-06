@@ -49,6 +49,8 @@ executables:
     dependencies:
       - dns-resolver
       - base
+      - bytestring
+      - optparse-applicative
 
 tests:
   spec:

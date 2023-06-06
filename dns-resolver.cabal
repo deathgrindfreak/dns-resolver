@@ -54,7 +54,9 @@ executable dns-resolver
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Werror -Wunused-packages -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-unticked-promoted-constructors
   build-depends:
       base
+    , bytestring
     , dns-resolver
+    , optparse-applicative
   default-language: Haskell2010
 
 test-suite spec
