@@ -10,9 +10,9 @@ import qualified Test.Tasty.Hedgehog as THH
 import Control.Monad.IO.Class (liftIO)
 import Data.Attoparsec.ByteString
 import Data.Bits (shiftR, (.&.))
-import Data.Char (ord)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Builder as BSB
+import Data.Char (ord)
 import Data.Word (Word16)
 
 import DNS

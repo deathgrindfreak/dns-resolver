@@ -17,10 +17,10 @@ import Control.Applicative ((<|>))
 import Control.Monad (mzero, when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.Helper
-import Data.Bits (shiftR, testBit, clearBit)
+import Data.Bits (clearBit, shiftR, testBit)
 import Data.Bits.Helper
-import Data.List (intercalate)
 import qualified Data.ByteString as BS
+import Data.List (intercalate)
 import Data.Word (Word16)
 import Prelude hiding (take)
 
@@ -71,14 +71,13 @@ parseRecord packet = do
 
 parseDomainName :: BS.ByteString -> Parser BS.ByteString
 parseDomainName packet =
-  parseLabelsAndCompressed
+  parseLabelsWithPointer
     <|> parseFromPointer
     <|> (parseLabelsWithoutNull <* anyWord8)
   where
-    parseLabelsAndCompressed = do
-      labels <- parseLabelsWithoutNull
-      ptr <- parseFromPointer
-      pure $ labels <> "." <> ptr
+    parseLabelsWithPointer =
+      BS.intercalate "."
+        <$> sequence [parseLabelsWithoutNull, parseFromPointer]
 
     parseLabelsWithoutNull = BS.intercalate "." <$> many1' parseLabel
 
