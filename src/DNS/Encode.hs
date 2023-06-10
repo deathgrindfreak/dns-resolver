@@ -27,9 +27,9 @@ serializeQuery ::
   BS.ByteString ->
   DNSRequestType ->
   LBS.ByteString
-serializeQuery headerId name recordType =
+serializeQuery headerId questionName questionType =
   let header = defaultHeader {headerId, numQuestions = 1}
-      question = DNSQuestion {name, type_ = recordType, class_ = classIn}
+      question = DNSQuestion {questionName, questionType, questionClass = classIn}
    in BSB.toLazyByteString $
         serializeHeader header <> serializeQuestion question
 
@@ -66,9 +66,9 @@ serializeFlags fs =
 
 serializeQuestion :: DNSQuestion -> BSB.Builder
 serializeQuestion qstn =
-  encodeDnsName qstn.name
-    <> (BSB.word16BE . dnsRequestTypeId) qstn.type_
-    <> (BSB.word16BE . fromIntegral) qstn.class_
+  encodeDnsName qstn.questionName
+    <> (BSB.word16BE . dnsRequestTypeId) qstn.questionType
+    <> (BSB.word16BE . fromIntegral) qstn.questionClass
 
 encodeDnsName :: BS.ByteString -> BSB.Builder
 encodeDnsName name =

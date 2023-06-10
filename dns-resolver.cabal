@@ -72,7 +72,8 @@ test-suite spec
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Werror -Wunused-packages -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-unticked-promoted-constructors -fno-warn-type-defaults -fno-warn-missing-home-modules -Wno-missing-export-lists -Wno-unused-packages
   build-depends:
-      base
+      attoparsec
+    , base
     , bytestring
     , dns-resolver
     , hedgehog

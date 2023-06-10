@@ -1,7 +1,5 @@
 {-# LANGUAGE BinaryLiterals #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 
 module DNS.Decode
@@ -9,6 +7,7 @@ module DNS.Decode
   , parseHeader
   , parseQuestion
   , parseRecord
+  , parseDomainName
   , parseFlags
   , isZSet
   )
@@ -18,8 +17,9 @@ import Control.Applicative ((<|>))
 import Control.Monad (mzero, when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.Helper
-import Data.Bits (shiftR, testBit, (.&.))
+import Data.Bits (shiftR, testBit, clearBit)
 import Data.Bits.Helper
+import Data.List (intercalate)
 import qualified Data.ByteString as BS
 import Data.Word (Word16)
 import Prelude hiding (take)
@@ -42,35 +42,58 @@ parsePacket = do
 parseQuestion :: Parser DNSQuestion
 parseQuestion = do
   DNSQuestion
-    <$> parseName BS.empty -- Question names aren't compressed
+    <$> parseDomainName BS.empty -- Question names aren't compressed
     <*> (either fail pure . idToDNSRequestType =<< anyWord16BE)
     <*> (fromIntegral <$> anyWord16BE)
 
 parseRecord :: BS.ByteString -> Parser DNSRecord
-parseRecord packet =
-  DNSRecord
-    <$> parseName packet
-    <*> (either fail pure . idToDNSRequestType =<< anyWord16BE)
-    <*> (fromIntegral <$> anyWord16BE)
+parseRecord packet = do
+  rName <- parseDomainName packet
+  rType <- either fail pure . idToDNSRequestType =<< anyWord16BE
+  DNSRecord rName rType
+    <$> (fromIntegral <$> anyWord16BE)
     <*> (fromIntegral <$> anyWord32BE)
-    <*> (take . fromIntegral =<< anyWord16BE)
-
-parseName :: BS.ByteString -> Parser BS.ByteString
-parseName packet = do
-  parseCompressed <|> (BS.intercalate "." <$> many1' parsePart <* anyWord8)
+    <*> parseDataType rType
   where
-    parsePart =
-      anyWord8 >>= \case
-        0 -> mzero
-        l -> take (fromIntegral l)
+    parseDataType t = do
+      bs <- take . fromIntegral =<< anyWord16BE
+      case t of
+        A -> pure $ IPv4 (toIPv4BS bs)
+        AAAA -> pure $ Undefined bs
+        TXT -> pure $ Undefined bs
+        CNAME -> Cname <$> parseCname bs
+        NS -> pure $ Undefined bs
+        MX -> pure $ Undefined bs
+        SOA -> pure $ Undefined bs
 
-    parseCompressed = do
-      l <- anyWord8
-      if l .&. 0b1100_0000 == 0
-        then mzero
-        else do
-          l' <- fromIntegral . (l .&. 0b0011_1111 +) <$> anyWord8
-          subParser (parseName packet) (BS.drop l' packet)
+    toIPv4BS = intercalate "." . map show . BS.unpack
+    parseCname = either fail pure . parseOnly (parseDomainName packet)
+
+parseDomainName :: BS.ByteString -> Parser BS.ByteString
+parseDomainName packet =
+  parseLabelsAndCompressed
+    <|> parseFromPointer
+    <|> (parseLabelsWithoutNull <* anyWord8)
+  where
+    parseLabelsAndCompressed = do
+      labels <- parseLabelsWithoutNull
+      ptr <- parseFromPointer
+      pure $ labels <> "." <> ptr
+
+    parseLabelsWithoutNull = BS.intercalate "." <$> many1' parseLabel
+
+    parseLabel = do
+      l <- fromIntegral <$> anyWord8
+      if l == 0 then mzero else take l
+
+    parseFromPointer = do
+      l <- fromIntegral <$> anyWord16BE
+      if isPointer l
+        then subParser (parseDomainName packet) (BS.drop (mkPointer l) packet)
+        else mzero
+
+    isPointer w = all (testBit w) [14, 15]
+    mkPointer w = foldr (flip clearBit) w [14, 15]
 
 parseHeader :: Parser (DNSHeader Int)
 parseHeader =

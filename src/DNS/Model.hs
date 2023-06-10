@@ -4,6 +4,7 @@ module DNS.Model
   ( DNSPacket (..)
   , DNSHeader (..)
   , DNSHeaderFlags (..)
+  , DNSDataType (..)
   , QR (..)
   , RCode (..)
   , DNSQuestion (..)
@@ -60,9 +61,9 @@ data DNSHeader a = DNSHeader
   deriving (Show)
 
 data DNSQuestion = DNSQuestion
-  { name :: BS.ByteString
-  , type_ :: DNSRequestType
-  , class_ :: Int
+  { questionName :: BS.ByteString
+  , questionType :: DNSRequestType
+  , questionClass :: Int
   }
   deriving (Show)
 
@@ -71,8 +72,15 @@ data DNSRecord = DNSRecord
   , recordType :: DNSRequestType
   , recordClass :: Int
   , recordTTL :: Int
-  , recordData :: BS.ByteString
+  , recordData :: DNSDataType
   }
+  deriving (Show)
+
+data DNSDataType
+  = IPv4 String
+  | IPv6 BS.ByteString
+  | Cname BS.ByteString
+  | Undefined BS.ByteString
   deriving (Show)
 
 data DNSRequestType
