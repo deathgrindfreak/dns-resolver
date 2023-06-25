@@ -188,7 +188,7 @@ test_DnsEncode =
           let result =
                 BSB.toLazyByteString $
                   BSB.word16BE 0xCB01
-                    <> BSB.word16BE 0b0000000100000000
+                    <> BSB.word16BE 0b0000000000000000
                     <> BSB.word16BE 1
                     <> BSB.word16BE 0
                     <> BSB.word16BE 0

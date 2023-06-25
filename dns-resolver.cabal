@@ -22,6 +22,7 @@ library
   exposed-modules:
       Data.Attoparsec.Helper
       Data.Bits.Helper
+      Data.IPV6
       DNS
       DNS.Decode
       DNS.Encode
@@ -41,6 +42,8 @@ library
     , network
     , network-run
     , random
+    , safe
+    , utf8-string
   default-language: Haskell2010
 
 executable dns-resolver

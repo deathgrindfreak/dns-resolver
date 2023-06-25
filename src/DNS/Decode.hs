@@ -20,11 +20,13 @@ import Data.Attoparsec.Helper
 import Data.Bits (clearBit, shiftR, testBit)
 import Data.Bits.Helper
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.UTF8 as BSUTF8
 import Data.List (intercalate)
 import Data.Word (Word16)
 import Prelude hiding (take)
 
 import DNS.Model
+import Data.IPV6 (showIPV6)
 
 parsePacket :: Parser DNSPacket
 parsePacket = do
@@ -59,8 +61,8 @@ parseRecord packet = do
       bs <- take . fromIntegral =<< anyWord16BE
       case t of
         A -> pure $ IPv4 (toIPv4BS bs)
-        AAAA -> pure $ Undefined bs
-        TXT -> pure $ Undefined bs
+        AAAA -> pure $ IPv6 (showIPV6 bs)
+        TXT -> pure $ Text (BSUTF8.toString bs)
         CNAME -> Cname <$> parseCname bs
         NS -> pure $ Undefined bs
         MX -> pure $ Undefined bs

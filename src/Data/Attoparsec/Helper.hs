@@ -1,5 +1,6 @@
 module Data.Attoparsec.Helper
   ( beInt
+  , wordsToBEInt
   , anyWord16BE
   , anyWord32BE
   , subParser

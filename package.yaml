@@ -39,8 +39,10 @@ library:
     - network
     - network-run
     - bytestring
+    - utf8-string
     - attoparsec
     - random
+    - safe
 
 executables:
   dns-resolver:

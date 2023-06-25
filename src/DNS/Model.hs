@@ -22,7 +22,7 @@ import Data.Word (Word16)
 
 defaultFlags :: DNSHeaderFlags
 defaultFlags =
-  DNSHeaderFlags Query 0 True False False False Success
+  DNSHeaderFlags Query 0 False False False False Success
 
 defaultHeader :: DNSHeader ()
 defaultHeader = DNSHeader () defaultFlags 0 0 0 0
@@ -78,8 +78,9 @@ data DNSRecord = DNSRecord
 
 data DNSDataType
   = IPv4 String
-  | IPv6 BS.ByteString
+  | IPv6 String
   | Cname BS.ByteString
+  | Text String
   | Undefined BS.ByteString
   deriving (Show)
 
@@ -91,7 +92,7 @@ data DNSRequestType
   | NS
   | MX
   | SOA
-  deriving (Show, Eq, Enum)
+  deriving (Show, Read, Eq, Enum)
 
 dnsRequestTypeId :: DNSRequestType -> Word16
 dnsRequestTypeId tp =
