@@ -23,10 +23,10 @@ test_DnsDecode =
     "DNS Decode"
     [ THH.testProperty "serialize/deserialize is idempotent" $
         HH.withDiscards 5000 . HH.property $ do
-          flags <- HH.forAll $ Gen.word16 Range.constantBounded
-          case parseOnly parseFlags $ toBytes flags of
+          fs <- HH.forAll $ Gen.word16 Range.constantBounded
+          case parseOnly parseFlags $ toBytes fs of
             Left _ -> HH.discard
-            Right f -> serializeFlags f === flags
+            Right f -> serializeFlags f === fs
     , THH.testProperty "encode/decode domain names is idempotent" $
         HH.property $ do
           domainName <- HH.forAll genDomainName
@@ -36,6 +36,13 @@ test_DnsDecode =
           packet <- liftIO $ BS.readFile "test/responses/www.facebook.com"
           decodeNameWithPacket packet (BS.drop 0x0C packet) === "www.facebook.com"
           decodeNameWithPacket packet (BS.drop 0x2E packet) === "star-mini.c10r.facebook.com"
+    , THH.testProperty "Should parse domain names from google.com, type A response" $
+        HH.property $ do
+          packet <- liftIO $ BS.readFile "test/responses/google.com.A"
+          decodeNameWithPacket packet (BS.drop 0x28 packet) === "a.gtld-servers.net"
+          decodeNameWithPacket packet (BS.drop 0x48 packet) === "b.gtld-servers.net"
+          decodeNameWithPacket packet (BS.drop 0x10C packet) === "b.gtld-servers.net"
+          decodeNameWithPacket packet (BS.drop 0x1BC packet) === "m.gtld-servers.net"
     ]
 
 genDomainName :: HH.MonadGen m => m BS.ByteString

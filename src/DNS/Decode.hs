@@ -1,4 +1,5 @@
 {-# LANGUAGE BinaryLiterals #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 
@@ -14,13 +15,14 @@ module DNS.Decode
 where
 
 import Control.Applicative ((<|>))
-import Control.Monad (mzero, when)
+import Control.Monad (when)
 import Data.Attoparsec.ByteString
 import Data.Attoparsec.Helper
 import Data.Bits (clearBit, shiftR, testBit)
 import Data.Bits.Helper
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.UTF8 as BSUTF8
+import Data.Functor (($>))
 import Data.List (intercalate)
 import Data.Word (Word16)
 import Prelude hiding (take)
@@ -63,36 +65,36 @@ parseRecord packet = do
         A -> pure $ IPv4 (toIPv4BS bs)
         AAAA -> pure $ IPv6 (showIPV6 bs)
         TXT -> pure $ Text (BSUTF8.toString bs)
-        CNAME -> Cname <$> parseCname bs
-        NS -> pure $ Undefined bs
+        CNAME -> Cname <$> parseName bs
+        NS -> NameServer <$> parseName bs
         MX -> pure $ Undefined bs
         SOA -> pure $ Undefined bs
 
     toIPv4BS = intercalate "." . map show . BS.unpack
-    parseCname = either fail pure . parseOnly (parseDomainName packet)
+    parseName = either fail pure . parseOnly (parseDomainName packet)
 
 parseDomainName :: BS.ByteString -> Parser BS.ByteString
-parseDomainName packet =
-  parseLabelsWithPointer
-    <|> parseFromPointer
-    <|> (parseLabelsWithoutNull <* anyWord8)
+parseDomainName packet = parseFromPointer <|> parseLabels
   where
-    parseLabelsWithPointer =
-      BS.intercalate "."
-        <$> sequence [parseLabelsWithoutNull, parseFromPointer]
+    parseLabels = do
+      labels <- BS.intercalate "." <$> many' parseLabel
+      end <- (word8 0 $> Nothing) <|> (Just <$> parseFromPointer)
+      pure $ labels <> maybe "" ("." <>) end
 
-    parseLabelsWithoutNull = BS.intercalate "." <$> many1' parseLabel
-
-    parseLabel = do
-      l <- fromIntegral <$> anyWord8
-      if l == 0 then mzero else take l
+    parseLabel =
+      peekWord8 >>= \case
+        Nothing -> fail "Expected length"
+        Just 0 -> fail "Encountered null"
+        Just l | isPointerWord8 l -> fail "Encountered pointer"
+        Just _ -> anyWord8 >>= take . fromIntegral
 
     parseFromPointer = do
       l <- fromIntegral <$> anyWord16BE
       if isPointer l
         then subParser (parseDomainName packet) (BS.drop (mkPointer l) packet)
-        else mzero
+        else fail "Expected pointer"
 
+    isPointerWord8 w = all (testBit w) [6, 7]
     isPointer w = all (testBit w) [14, 15]
     mkPointer w = foldr (flip clearBit) w [14, 15]
 

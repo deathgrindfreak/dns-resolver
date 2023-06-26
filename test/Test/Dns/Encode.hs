@@ -1,3 +1,5 @@
+{-# LANGUAGE BinaryLiterals #-}
+
 module Test.Dns.Encode (test_DnsEncode) where
 
 import Hedgehog ((===))
@@ -51,7 +53,7 @@ test_DnsEncode =
             === BSB.toLazyByteString result
     , THH.testProperty "Should encode null flags" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Query
                   , opCode = 0
@@ -61,10 +63,10 @@ test_DnsEncode =
                   , tc = False
                   , rCode = Success
                   }
-          serializeFlags flags === 0b0000000000000000
+          serializeFlags fs === 0b0000000000000000
     , THH.testProperty "Should encode QR properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0
@@ -74,10 +76,10 @@ test_DnsEncode =
                   , tc = False
                   , rCode = Success
                   }
-          serializeFlags flags === 0b1000000000000000
+          serializeFlags fs === 0b1000000000000000
     , THH.testProperty "Should encode QR, OP Code properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0x9
@@ -87,10 +89,10 @@ test_DnsEncode =
                   , tc = False
                   , rCode = Success
                   }
-          serializeFlags flags === 0b1100100000000000
+          serializeFlags fs === 0b1100100000000000
     , THH.testProperty "Should encode QR, OP Code, AA properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0x9
@@ -100,10 +102,10 @@ test_DnsEncode =
                   , tc = False
                   , rCode = Success
                   }
-          serializeFlags flags === 0b1100110000000000
+          serializeFlags fs === 0b1100110000000000
     , THH.testProperty "Should encode QR, OP Code, AA, TC properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0x9
@@ -113,10 +115,10 @@ test_DnsEncode =
                   , tc = True
                   , rCode = Success
                   }
-          serializeFlags flags === 0b1100111000000000
+          serializeFlags fs === 0b1100111000000000
     , THH.testProperty "Should encode QR, OP Code, AA, TC, RD properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0x9
@@ -126,10 +128,10 @@ test_DnsEncode =
                   , tc = True
                   , rCode = Success
                   }
-          serializeFlags flags === 0b1100111100000000
+          serializeFlags fs === 0b1100111100000000
     , THH.testProperty "Should encode QR, OP Code, AA, TC, RD, RA properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0x9
@@ -139,10 +141,10 @@ test_DnsEncode =
                   , tc = True
                   , rCode = Success
                   }
-          serializeFlags flags === 0b1100111110000000
+          serializeFlags fs === 0b1100111110000000
     , THH.testProperty "Should encode QR, OP Code, AA, TC, RD, RA, RCode properly" $
         HH.property $ do
-          let flags =
+          let fs =
                 DNSHeaderFlags
                   { qr = Response
                   , opCode = 0x9
@@ -152,7 +154,7 @@ test_DnsEncode =
                   , tc = True
                   , rCode = NXDomain
                   }
-          serializeFlags flags === 0b1100111110000011
+          serializeFlags fs === 0b1100111110000011
     , THH.testProperty "Should encode header properly" $
         HH.property $ do
           let hdrFlags =

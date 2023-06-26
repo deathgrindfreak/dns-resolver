@@ -2,29 +2,29 @@ module Data.IPV6 (showIPV6) where
 
 import qualified Data.ByteString as BS
 
-import Numeric
+import Data.Attoparsec.Helper
 import Data.List (groupBy, intercalate)
 import Data.Word (Word16)
-import Data.Attoparsec.Helper
+import Numeric
 import Safe
 
 showIPV6 :: BS.ByteString -> String
 showIPV6 =
   intercalate ":"
-  . replaceEmptyLeadOrTrail
-  . map (headDef "" . map (`showHex` ""))
-  . reduceConsecutiveZeros
-  . groupOnlyZeros
-  . groupWords
+    . replaceEmptyLeadOrTrail
+    . map (headDef "" . map (`showHex` ""))
+    . reduceConsecutiveZeros
+    . groupOnlyZeros
+    . groupWords
   where
     middle = initDef [] . tailDef []
 
-    ensureDouble ("":xs) = "":"":xs
+    ensureDouble ("" : xs) = "" : "" : xs
     ensureDouble ls = ls
 
     replaceEmptyLeadOrTrail [""] = [":", ""]
     replaceEmptyLeadOrTrail ls =
-       ensureDouble [headDef "" ls] ++ middle ls ++ ensureDouble [lastDef "" ls]
+      ensureDouble [headDef "" ls] ++ middle ls ++ ensureDouble [lastDef "" ls]
 
 reduceConsecutiveZeros :: (Num a, Eq a) => [[a]] -> [[a]]
 reduceConsecutiveZeros gs =
@@ -32,11 +32,11 @@ reduceConsecutiveZeros gs =
         maximum $ map (\l -> if head l == 0 then length l else 0) gs
 
       go _ [] = []
-      go True (x:xs) = map (:[]) x ++ go True xs
-      go False (x:xs) =
+      go True (x : xs) = map (: []) x ++ go True xs
+      go False (x : xs) =
         if head x == 0 && length x == maxZeros
-          then [] :  go True xs
-          else map (:[]) x ++ go False xs
+          then [] : go True xs
+          else map (: []) x ++ go False xs
    in go False gs
 
 groupOnlyZeros :: (Eq a, Num a) => [a] -> [[a]]

@@ -81,6 +81,7 @@ data DNSDataType
   | IPv6 String
   | Cname BS.ByteString
   | Text String
+  | NameServer BS.ByteString
   | Undefined BS.ByteString
   deriving (Show)
 

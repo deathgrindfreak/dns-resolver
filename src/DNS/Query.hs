@@ -8,6 +8,7 @@ import Network.Run.UDP (runUDPClient)
 import Network.Socket (HostName)
 import Network.Socket.ByteString (recv, sendAllTo)
 import System.Random
+import Text.Pretty.Simple
 
 import DNS.Decode
 import DNS.Encode
@@ -21,4 +22,4 @@ sendQuery ipAddress domainName rt = do
   runUDPClient ipAddress "53" $ \s sAddr -> do
     sendAllTo s query sAddr
     msg <- recv s 1024
-    either error print $ parseOnly parsePacket msg
+    either error pPrint $ parseOnly parsePacket msg
