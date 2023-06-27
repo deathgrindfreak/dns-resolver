@@ -25,7 +25,7 @@ classIn = 1
 serializeQuery ::
   Int ->
   BS.ByteString ->
-  DNSRequestType ->
+  DNSRecordType ->
   LBS.ByteString
 serializeQuery headerId questionName questionType =
   let header = defaultHeader {headerId, numQuestions = 1}

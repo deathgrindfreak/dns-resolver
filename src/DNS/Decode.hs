@@ -23,7 +23,6 @@ import Data.Bits.Helper
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.UTF8 as BSUTF8
 import Data.Functor (($>))
-import Data.List (intercalate)
 import Data.Word (Word16)
 import Prelude hiding (take)
 
@@ -47,13 +46,13 @@ parseQuestion :: Parser DNSQuestion
 parseQuestion = do
   DNSQuestion
     <$> parseDomainName BS.empty -- Question names aren't compressed
-    <*> (either fail pure . idToDNSRequestType =<< anyWord16BE)
+    <*> (either fail pure . idToDNSRecordType =<< anyWord16BE)
     <*> (fromIntegral <$> anyWord16BE)
 
 parseRecord :: BS.ByteString -> Parser DNSRecord
 parseRecord packet = do
   rName <- parseDomainName packet
-  rType <- either fail pure . idToDNSRequestType =<< anyWord16BE
+  rType <- either fail pure . idToDNSRecordType =<< anyWord16BE
   DNSRecord rName rType
     <$> (fromIntegral <$> anyWord16BE)
     <*> (fromIntegral <$> anyWord32BE)
@@ -62,7 +61,7 @@ parseRecord packet = do
     parseDataType t = do
       bs <- take . fromIntegral =<< anyWord16BE
       case t of
-        A -> pure $ IPv4 (toIPv4BS bs)
+        A -> pure $ IPv4 (IPv4Address bs)
         AAAA -> pure $ IPv6 (showIPV6 bs)
         TXT -> pure $ Text (BSUTF8.toString bs)
         CNAME -> Cname <$> parseName bs
@@ -70,10 +69,9 @@ parseRecord packet = do
         MX -> pure $ Undefined bs
         SOA -> pure $ Undefined bs
 
-    toIPv4BS = intercalate "." . map show . BS.unpack
     parseName = either fail pure . parseOnly (parseDomainName packet)
 
-parseDomainName :: BS.ByteString -> Parser BS.ByteString
+parseDomainName :: BS.ByteString -> Parser DNSHostName
 parseDomainName packet = parseFromPointer <|> parseLabels
   where
     parseLabels = do

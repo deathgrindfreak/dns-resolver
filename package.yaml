@@ -43,7 +43,6 @@ library:
     - attoparsec
     - random
     - safe
-    - pretty-simple
 
 executables:
   dns-resolver:
@@ -54,7 +53,6 @@ executables:
       - base
       - bytestring
       - optparse-applicative
-      - network
 
 tests:
   spec:

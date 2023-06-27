@@ -5,18 +5,21 @@ module DNS.Model
   , DNSHeader (..)
   , DNSHeaderFlags (..)
   , DNSDataType (..)
+  , DNSHostName
   , QR (..)
   , RCode (..)
   , DNSQuestion (..)
-  , DNSRequestType (..)
+  , DNSRecordType (..)
   , DNSRecord (..)
+  , IPv4Address (..)
   , defaultFlags
   , defaultHeader
   , dnsRequestTypeId
-  , idToDNSRequestType
+  , idToDNSRecordType
   )
 where
 
+import Data.List (intercalate)
 import qualified Data.ByteString as BS
 import Data.Word (Word16)
 
@@ -61,31 +64,40 @@ data DNSHeader a = DNSHeader
   deriving (Show)
 
 data DNSQuestion = DNSQuestion
-  { questionName :: BS.ByteString
-  , questionType :: DNSRequestType
+  { questionName :: DNSHostName
+  , questionType :: DNSRecordType
   , questionClass :: Int
   }
   deriving (Show)
 
 data DNSRecord = DNSRecord
-  { recordName :: BS.ByteString
-  , recordType :: DNSRequestType
+  { recordName :: DNSHostName
+  , recordType :: DNSRecordType
   , recordClass :: Int
   , recordTTL :: Int
   , recordData :: DNSDataType
   }
   deriving (Show)
 
+type DNSHostName = BS.ByteString
+
+newtype IPv4Address = IPv4Address
+  { ipv4AddressToByteString :: BS.ByteString }
+  deriving (Eq, Ord)
+
+instance Show IPv4Address where
+  show = intercalate "." . map show . BS.unpack . ipv4AddressToByteString
+
 data DNSDataType
-  = IPv4 String
+  = IPv4 IPv4Address
   | IPv6 String
-  | Cname BS.ByteString
+  | Cname DNSHostName
   | Text String
-  | NameServer BS.ByteString
+  | NameServer DNSHostName
   | Undefined BS.ByteString
   deriving (Show)
 
-data DNSRequestType
+data DNSRecordType
   = A
   | AAAA
   | TXT
@@ -95,7 +107,7 @@ data DNSRequestType
   | SOA
   deriving (Show, Read, Eq, Enum)
 
-dnsRequestTypeId :: DNSRequestType -> Word16
+dnsRequestTypeId :: DNSRecordType -> Word16
 dnsRequestTypeId tp =
   case tp of
     A -> 1
@@ -106,8 +118,8 @@ dnsRequestTypeId tp =
     MX -> 15
     SOA -> 6
 
-idToDNSRequestType :: Word16 -> Either String DNSRequestType
-idToDNSRequestType tp =
+idToDNSRecordType :: Word16 -> Either String DNSRecordType
+idToDNSRecordType tp =
   case tp of
     1 -> Right A
     28 -> Right AAAA
